@@ -119,6 +119,14 @@ def rm_conandir(path):
     rmdir(path)
 
 
+def _read_real_path(redirect):
+    rp = os.path.join(redirect, CONAN_REAL_PATH)
+    if not os.path.exists(rp):
+        return None
+    with open(rp) as f:
+        return f.read().strip()
+
+
 def hashed_redirect(base, path, min_length=6, attempts=10):
     max_length = min_length + attempts
 
@@ -127,7 +135,7 @@ def hashed_redirect(base, path, min_length=6, attempts=10):
 
     for length in range(min_length, max_length):
         redirect = os.path.join(base, full_hash[:length])
-        if not os.path.exists(redirect):
+        if not os.path.exists(redirect) or _read_real_path(redirect) == path:
             return redirect
     else:
         return None
